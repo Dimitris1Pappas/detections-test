@@ -7,6 +7,8 @@ import { useDetections } from "./hooks/useDetections";
 import { useTurbines } from "./hooks/useTurbines";
 import type { Detection } from "./types";
 import { acknowledgeDetection } from "./api/detections";
+import { DetectionPage } from "./components/DetectionPage";
+import { useDetectionNavigation } from "./hooks/useDetectionNavigation";
 
 const comparators: Record<
   SortKey,
@@ -19,6 +21,11 @@ const comparators: Record<
 export function App() {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("time");
+  const {
+  detectionId,
+  openDetection,
+  closeDetection,
+} = useDetectionNavigation();
 
   const [turbineId, setTurbineId] = useState("");
   const [unacknowledgedOnly, setUnacknowledgedOnly] =
@@ -32,7 +39,7 @@ export function App() {
       turbineId,
       unacknowledgedOnly,
     });
-    
+
 const [optimisticIds, setOptimisticIds] =
   useState<Set<string>>(() => new Set());
 
@@ -106,6 +113,18 @@ async function handleAcknowledge(id: string) {
     });
   }
 }
+
+  if (detectionId !== null) {
+    return (
+      <div className="shell">
+        <DetectionPage
+          detectionId={detectionId}
+          onBack={closeDetection}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="shell">
       <Header
@@ -157,6 +176,7 @@ async function handleAcknowledge(id: string) {
         onSort={handleSort}
         onAcknowledge={handleAcknowledge}
         pendingIds={pendingIds}
+        onOpenDetection={openDetection}
 />
       </main>
     </div>

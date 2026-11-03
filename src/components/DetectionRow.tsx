@@ -11,12 +11,14 @@ type Props = {
   detection: Detection;
   onAcknowledge: (id: string) => void;
   isPending: boolean;
+  onOpenDetection: (id: string) => void;
 };
 
 export function DetectionRow({
   detection,
   onAcknowledge,
   isPending,
+  onOpenDetection,
 }: Props) {
 
 const [expanded, setExpanded] = useState(false);
@@ -36,7 +38,28 @@ const percent = Math.round(detection.confidence * 100);
           </button>
         </td>
         <td className="cell--time">{timeFormat.format(new Date(detection.detectedAt))}</td>
-        <td className="cell--species">{detection.species}</td>
+        <td className="cell--species">
+  <a
+    className="detection-link"
+    href={`/?detection=${encodeURIComponent(detection.id)}`}
+    onClick={(event) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      onOpenDetection(detection.id);
+    }}
+  >
+    {detection.species}
+  </a>
+</td>
         <td>{detection.turbineId}</td>
         <td>
           <span className="confidence" style={{ "--confidence": `${percent}%` } as CSSProperties}>

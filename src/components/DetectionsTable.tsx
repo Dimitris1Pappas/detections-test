@@ -9,6 +9,7 @@ type Props = {
   onSort: (key: SortKey) => void;
   onAcknowledge: (id: string) => void;
   pendingIds: Set<string>;
+  onOpenDetection: (id: string) => void;
 };
 
 export function DetectionsTable({
@@ -17,6 +18,7 @@ export function DetectionsTable({
   onSort,
   onAcknowledge,
   pendingIds,
+  onOpenDetection,
 }: Props) 
 
 {
@@ -50,6 +52,7 @@ export function DetectionsTable({
     detection={detection}
     onAcknowledge={onAcknowledge}
     isPending={pendingIds.has(detection.id)}
+    onOpenDetection={onOpenDetection}
   />
 ))}
         </tbody>
