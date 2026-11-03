@@ -8,20 +8,37 @@ export function useDetections(search: string) {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
+useEffect(() => {
+      const controller = new AbortController();
+      
+      setLoading(true);
+      setError(null);
 
-    fetchDetections({ search })
+      fetchDetections({ search}, { signal: controller.signal })
       .then((data) => {
+        if (controller.signal.aborted) return;
+
         setDetections(data);
         setLastUpdated(new Date());
-      })
-      .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : "Could not load detections.");
-      })
-      .finally(() => setLoading(false));
-  }, [search]);
 
-  return { detections, setDetections, loading, error, lastUpdated };
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+
+        setError(
+          error instanceof Error
+          ? error.message
+          : "Could not load detections."
+        );
+      })
+      .finally(() => {
+        if(!controller.signal.aborted) {
+          setLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  },[search]); 
+
+  return { detections, loading, error, lastUpdated };
 }
