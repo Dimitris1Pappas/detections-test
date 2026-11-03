@@ -137,3 +137,38 @@ button, input, select { font: inherit; color: inherit; }
 .empty { padding: 2rem; text-align: center; color: var(--ink-soft); background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; }
 
 @media (prefers-reduced-motion: reduce) { .table { transition: none; } }
+
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.acknowledge-btn {
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.acknowledge-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.acknowledge-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.acknowledge-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}

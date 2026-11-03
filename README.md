@@ -75,6 +75,7 @@ Filters combine with the search and are applied by the backend
 
 Bonus: keep the search and filters in the URL, so a refresh or a shared link
 shows the same view.
+
 **
 I added turbine and unacknowledged-only filters alongside the existing search. Turbine options come from fetchTurbines(), and all filters work together through fetchDetections().The parent manages the filter state, while the filter component stays reusable. AbortController prevents outdated responses, and sorting works separately from filtering.I left URL persistence out for now to focus on the main functionality within the time limit.All three filters work together. The search matches detections by keyword, the turbine filter limits results to a specific turbine, and the unacknowledged-only filter shows only detections that haven't been acknowledged. When multiple filters are active, results must match all of them. Sorting is applied separately to the filtered results.
 **
@@ -90,6 +91,10 @@ In the Review column, unacknowledged detections should have an
   back to unacknowledged and the operator sees a clear message.
 - The "Awaiting review" number in the header stays correct.
 
+**
+Implemented optimistic acknowledgement so operators receive immediate feedback without waiting for the API response.Used a separate optimistic state layer to prevent background fetches and filter changes from overwriting pending acknowledgement updates.Added a synchronous ref-based guard to prevent duplicate requests for the same detection.On failure, the optimistic change is rolled back and an accessible error message is displayed using role="alert".The displayed unacknowledged count updates immediately and is restored if the request fails.Trade-off: The header count currently reflects the filtered detection list, rather than a global unacknowledged total. A production implementation would ideally use a dedicated server-provided aggregate for the overall count.
+
+**
 ### 5. Feature: detection page
 
 From the operations lead:

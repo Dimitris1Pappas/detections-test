@@ -7,12 +7,19 @@ type Props = {
   detections: Detection[];
   loading: boolean;
   onSort: (key: SortKey) => void;
+  onAcknowledge: (id: string) => void;
+  pendingIds: Set<string>;
 };
 
-export function DetectionsTable({ detections, loading, onSort }: Props) {
-  if (!loading && detections.length === 0) {
-    return <p className="empty">No detections match your search. Clear the search to see all detections.</p>;
-  }
+export function DetectionsTable({
+  detections,
+  loading,
+  onSort,
+  onAcknowledge,
+  pendingIds,
+}: Props) 
+
+{
 
   return (
     <div className="table-wrap" aria-busy={loading}>
@@ -37,9 +44,14 @@ export function DetectionsTable({ detections, loading, onSort }: Props) {
           </tr>
         </thead>
         <tbody>
-          {detections.map((detection,) => (
-            <DetectionRow key={detection.id} detection={detection} />
-          ))}
+          {detections.map((detection) => (
+  <DetectionRow
+    key={detection.id}
+    detection={detection}
+    onAcknowledge={onAcknowledge}
+    isPending={pendingIds.has(detection.id)}
+  />
+))}
         </tbody>
       </table>
       {loading && <div className="loading">Loading detections…</div>}

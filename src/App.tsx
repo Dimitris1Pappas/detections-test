@@ -6,6 +6,7 @@ import { SearchBox } from "./components/SearchBox";
 import { useDetections } from "./hooks/useDetections";
 import { useTurbines } from "./hooks/useTurbines";
 import type { Detection } from "./types";
+import { acknowledgeDetection } from "./api/detections";
 
 const comparators: Record<
   SortKey,
@@ -31,19 +32,84 @@ export function App() {
       turbineId,
       unacknowledgedOnly,
     });
+    
+const [optimisticIds, setOptimisticIds] =
+  useState<Set<string>>(() => new Set());
 
-  const sortedDetections = useMemo(() => {
-    return [...detections].sort(comparators[sortKey]);
-  }, [detections, sortKey]);
+const displayedDetections = useMemo(() => {
+  return detections
+    .map((detection) => ({
+      ...detection,
+      acknowledged:
+        detection.acknowledged ||
+        optimisticIds.has(detection.id),
+    }))
+    .filter(
+      (detection) =>
+        !unacknowledgedOnly || !detection.acknowledged
+    );
+}, [detections, optimisticIds, unacknowledgedOnly]);
+
+const sortedDetections = useMemo(() => {
+  return [...displayedDetections].sort(comparators[sortKey]);
+}, [displayedDetections, sortKey]);
+
+
+  // const [optimisticIds, setOptimisticIds] =
+  // useState<Set<string>>(() => new Set());
+
+const [pendingIds, setPendingIds] =
+  useState<Set<string>>(() => new Set());
+
+const pendingRef = useRef(new Set<string>());
+
+const [acknowledgeError, setAcknowledgeError] =
+  useState<string | null>(null);
 
   function handleSort(key: SortKey) {
     setSortKey(key);
   }
+async function handleAcknowledge(id: string) {
+  
+  if (pendingRef.current.has(id) || optimisticIds.has(id)) {
+    return;
+  }
 
+  pendingRef.current.add(id);
+
+  setPendingIds((prev) => new Set(prev).add(id));
+  setOptimisticIds((prev) => new Set(prev).add(id));
+  setAcknowledgeError(null);
+
+  try {
+    await acknowledgeDetection(id);
+  } catch (error) {
+    
+    setOptimisticIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+
+    setAcknowledgeError(
+      error instanceof Error
+        ? error.message
+        : "Could not acknowledge the detection."
+    );
+  } finally {
+    pendingRef.current.delete(id);
+
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+}
   return (
     <div className="shell">
       <Header
-        detections={detections}
+        detections={displayedDetections}
         lastUpdated={lastUpdated}
       />
 
@@ -77,11 +143,21 @@ export function App() {
           </p>
         )}
 
+
+        {acknowledgeError && (
+        <p role="alert" className="alert">
+        {acknowledgeError}
+        </p>
+        )}
+
+
         <DetectionsTable
-          detections={sortedDetections}
-          loading={loading}
-          onSort={handleSort}
-        />
+        detections={sortedDetections}
+        loading={loading}
+        onSort={handleSort}
+        onAcknowledge={handleAcknowledge}
+        pendingIds={pendingIds}
+/>
       </main>
     </div>
   );

@@ -9,12 +9,18 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
 
 type Props = {
   detection: Detection;
+  onAcknowledge: (id: string) => void;
+  isPending: boolean;
 };
 
-export function DetectionRow({ detection }: Props) {
-  const [expanded, setExpanded] = useState(false);
-  const percent = Math.round(detection.confidence * 100);
+export function DetectionRow({
+  detection,
+  onAcknowledge,
+  isPending,
+}: Props) {
 
+const [expanded, setExpanded] = useState(false);
+const percent = Math.round(detection.confidence * 100);
   return (
     <>
       <tr className={expanded ? "row row--open" : "row"}>
@@ -39,12 +45,27 @@ export function DetectionRow({ detection }: Props) {
         </td>
         <td>{detection.curtailed ? <span className="tag tag--curtailed">Curtailed</span> : null}</td>
         <td>
-          {detection.acknowledged ? (
-            <span className="tag tag--done">Reviewed</span>
-          ) : (
-            <span className="tag tag--pending">Awaiting review</span>
-          )}
-        </td>
+  {detection.acknowledged ? (
+    <span className="tag tag--done">
+      Reviewed
+    </span>
+  ) : (
+    <div className="review-actions">
+      <span className="tag tag--pending">
+        Awaiting review
+      </span>
+
+      <button
+        type="button"
+        className="acknowledge-btn"
+        onClick={() => onAcknowledge(detection.id)}
+        disabled={isPending}
+      >
+        Acknowledge
+      </button>
+    </div>
+  )}
+</td>
       </tr>
       {expanded && (
         <tr className="details">
