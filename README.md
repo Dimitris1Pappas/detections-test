@@ -75,7 +75,9 @@ Filters combine with the search and are applied by the backend
 
 Bonus: keep the search and filters in the URL, so a refresh or a shared link
 shows the same view.
-
+**
+I added turbine and unacknowledged-only filters alongside the existing search. Turbine options come from fetchTurbines(), and all filters work together through fetchDetections().The parent manages the filter state, while the filter component stays reusable. AbortController prevents outdated responses, and sorting works separately from filtering.I left URL persistence out for now to focus on the main functionality within the time limit.All three filters work together. The search matches detections by keyword, the turbine filter limits results to a specific turbine, and the unacknowledged-only filter shows only detections that haven't been acknowledged. When multiple filters are active, results must match all of them. Sorting is applied separately to the filtered results.
+**
 ### 4. Feature: acknowledge a detection
 
 In the Review column, unacknowledged detections should have an
