@@ -46,7 +46,9 @@ Report from an operator:
 
 > When I type "kite" quickly, the table sometimes ends up showing kestrels and
 > other birds, not just kites. If I type slowly it's fine.
-
+**
+Multiple overlapping search requests could resolve out of order, allowing stale responses to overwrite newer results. Fixed by cancelling previous requests using AbortController and preventing aborted requests from updating component state.
+**
 ### 2. Bug: sorting does nothing
 
 Report from an operator:
@@ -56,7 +58,10 @@ Report from an operator:
 
 Expected: "Confidence" sorts highest first, "Time" sorts newest first, and the
 chosen sort stays applied when the search or filters change.
-
+**
+The sorting function was changing the original detections array, so React didn't always detect the update. Also, the selected sort was lost when new search results loaded.
+I fixed this by storing the sort option in state and using useMemo to sort a copy of the detections. This keeps sorting consistent across searches and filter changes.
+**
 ### 3. Feature: filters
 
 Add two filters next to the search:

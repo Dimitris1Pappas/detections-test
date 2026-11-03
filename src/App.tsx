@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useMemo } from "react";
 import { DetectionsTable, type SortKey } from "./components/DetectionsTable";
 import { Header } from "./components/Header";
 import { SearchBox } from "./components/SearchBox";
@@ -12,11 +12,16 @@ const comparators: Record<SortKey, (a: Detection, b: Detection) => number> = {
 
 export function App() {
   const [search, setSearch] = useState("");
-  const { detections, setDetections, loading, error, lastUpdated } = useDetections(search);
+  const [sortKey,setSortKey] = useState<SortKey>("time");
+  const { detections, loading, error, lastUpdated } = useDetections(search);
 
+  const sortedDetections = useMemo(() => {
+    return [...detections].sort(comparators[sortKey]);
+
+  },[detections, sortKey]);
+  
   function handleSort(key: SortKey) {
-    detections.sort(comparators[key]);
-    setDetections(detections);
+    setSortKey(key);
   }
 
   return (
@@ -35,7 +40,7 @@ export function App() {
           </p>
         )}
 
-        <DetectionsTable detections={detections} loading={loading} onSort={handleSort} />
+        <DetectionsTable detections={sortedDetections} loading={loading} onSort={handleSort} />
       </main>
     </div>
   );

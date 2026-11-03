@@ -37,8 +37,8 @@ export function DetectionsTable({ detections, loading, onSort }: Props) {
           </tr>
         </thead>
         <tbody>
-          {detections.map((detection, index) => (
-            <DetectionRow key={index} detection={detection} />
+          {detections.map((detection,) => (
+            <DetectionRow key={detection.id} detection={detection} />
           ))}
         </tbody>
       </table>
